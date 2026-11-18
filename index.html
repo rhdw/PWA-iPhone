@@ -7,24 +7,86 @@
     <title>Meine PWA</title>
 
     <link rel="manifest" href="manifest.json">
+
     <meta name="theme-color" content="#2196f3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Meine PWA">
 
     <link rel="apple-touch-icon" href="icon-180.png">
+
+    <style>
+        #startupInfo{
+            position:fixed;
+            top:20px;
+            left:50%;
+            transform:translateX(-50%);
+            background:#2196f3;
+            color:white;
+            padding:12px 20px;
+            border-radius:10px;
+            font-size:16px;
+            font-weight:bold;
+            text-align:center;
+            box-shadow:0 3px 10px rgba(0,0,0,.3);
+            z-index:9999;
+            display:none;
+        }
+    </style>
+
 </head>
+
 <body>
+
     <div id="startupInfo"></div>
+
     <h1>Meine erste PWA</h1>
     <p>Hallo Welt!</p>
 
     <script>
+
+        const APP_VERSION = "app-v2";
+
         if ('serviceWorker' in navigator) {
+
             navigator.serviceWorker.register('service-worker.js')
-                .then(() => console.log('Service Worker registriert'))
+                .then(() => {
+
+                    console.log('Service Worker registriert');
+
+                    navigator.serviceWorker.ready.then(() => {
+
+                        const lastVersion =
+                            localStorage.getItem("shownVersion");
+
+                        if (lastVersion !== APP_VERSION) {
+
+                            const box =
+                                document.getElementById("startupInfo");
+
+                            box.innerHTML =
+                                "Version " + APP_VERSION +
+                                "<br>Service Worker aktiv";
+
+                            box.style.display = "block";
+
+                            setTimeout(() => {
+                                box.style.display = "none";
+                            }, 3000);
+
+                            localStorage.setItem(
+                                "shownVersion",
+                                APP_VERSION
+                            );
+                        }
+
+                    });
+
+                })
                 .catch(err => console.error(err));
+
         }
+
     </script>
 
 </body>
