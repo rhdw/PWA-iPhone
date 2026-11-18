@@ -8,15 +8,32 @@ const FILES = [
 ];
 
 self.addEventListener("install", event => {
+
     event.waitUntil(
+
         caches.open(CACHE)
             .then(cache => cache.addAll(FILES))
-            .then(() => self.skipWaiting())
+            .then(() => {
+
+                self.skipWaiting();
+
+                self.clients.matchAll().then(clients => {
+                    clients.forEach(client => {
+                        client.postMessage({
+                            type: "CACHE_READY",
+                            version: CACHE
+                        });
+                    });
+                });
+
+            })
     );
 });
 
 self.addEventListener("activate", event => {
+
     event.waitUntil(
+
         caches.keys().then(keys =>
             Promise.all(
                 keys.map(key => {
@@ -26,12 +43,18 @@ self.addEventListener("activate", event => {
                 })
             )
         ).then(() => self.clients.claim())
+
     );
+
 });
 
 self.addEventListener("fetch", event => {
+
     event.respondWith(
         caches.match(event.request)
-            .then(response => response || fetch(event.request))
+            .then(response =>
+                response || fetch(event.request)
+            )
     );
+
 });
