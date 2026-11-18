@@ -43,51 +43,64 @@
     <h1>Meine erste PWA</h1>
     <p>Hallo Welt!</p>
 
-    <script>
+<script>
 
-        const APP_VERSION = "app-v2";
+const APP_VERSION = "app-v2";
 
-        if ('serviceWorker' in navigator) {
+function showStartupMessage(version) {
 
-            navigator.serviceWorker.register('service-worker.js')
-                .then(() => {
+    const lastVersion =
+        localStorage.getItem("shownVersion");
 
-                    console.log('Service Worker registriert');
+    if (lastVersion === version) return;
 
-                    navigator.serviceWorker.ready.then(() => {
+    const box =
+        document.getElementById("startupInfo");
 
-                        const lastVersion =
-                            localStorage.getItem("shownVersion");
+    box.innerHTML =
+        "Version " + version +
+        "<br>Cache aufgebaut" +
+        "<br>Service Worker aktiv";
 
-                        if (lastVersion !== APP_VERSION) {
+    box.style.display = "block";
 
-                            const box =
-                                document.getElementById("startupInfo");
+    setTimeout(() => {
+        box.style.display = "none";
+    }, 3000);
 
-                            box.innerHTML =
-                                "Version " + APP_VERSION +
-                                "<br>Service Worker aktiv";
+    localStorage.setItem(
+        "shownVersion",
+        version
+    );
+}
 
-                            box.style.display = "block";
 
-                            setTimeout(() => {
-                                box.style.display = "none";
-                            }, 3000);
+if ('serviceWorker' in navigator) {
 
-                            localStorage.setItem(
-                                "shownVersion",
-                                APP_VERSION
-                            );
-                        }
+    navigator.serviceWorker.register(
+        'service-worker.js'
+    );
 
-                    });
+    navigator.serviceWorker.addEventListener(
+        'message',
+        event => {
 
-                })
-                .catch(err => console.error(err));
+            if (
+                event.data &&
+                event.data.type === "CACHE_READY"
+            ) {
+
+                showStartupMessage(
+                    event.data.version
+                );
+
+            }
 
         }
+    );
+}
 
-    </script>
+</script>
 
 </body>
 </html>
